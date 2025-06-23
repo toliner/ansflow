@@ -1,0 +1,39 @@
+[versions]
+kotlin = "2.1.20"
+detekt = "1.23.8"
+ktlint = "12.3.0"
+compose = "1.8.1"
+coroutines = "1.10.2"
+serialization = "1.8.1"
+kotest = "5.9.1"
+mosaic = "0.17.0"
+kaml = "0.82.0"
+
+[libraries]
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+
+mosaic = { module = "com.jakewharton.mosaic:mosaic-runtime", version.ref = "mosaic" }
+
+# Kotlinx Libraries
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+
+# Serialization
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+kaml = { module = "com.charleskorn.kaml:kaml" , version.ref = "kaml"}
+
+# Kotest
+kotest-runner = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
+kotest-assertions = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
+
+[bundles]
+kotest = [ "kotest-assertions", "kotest-property", "kotest-runner" ]
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
