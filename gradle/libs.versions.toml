@@ -8,9 +8,12 @@ serialization = "1.8.1"
 kotest = "5.9.1"
 mosaic = "0.17.0"
 kaml = "0.82.0"
+koin = "4.0.3"
+mockk = "1.14.4"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 
 mosaic = { module = "com.jakewharton.mosaic:mosaic-runtime", version.ref = "mosaic" }
 
@@ -21,6 +24,11 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 # Serialization
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 kaml = { module = "com.charleskorn.kaml:kaml" , version.ref = "kaml"}
+
+# Koin
+koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin" }
+koin-core = { module = "io.insert-koin:koin-core" }
+koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
 
 # Kotest
 kotest-runner = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }

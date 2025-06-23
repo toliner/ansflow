@@ -24,9 +24,14 @@ repositories {
 dependencies {
     implementation(libs.mosaic)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(project.dependencies.platform(libs.koin.bom))
+    implementation(libs.koin.core)
     implementation(libs.kaml)
     testImplementation(libs.bundles.kotest)
     testImplementation(libs.kotlin.test)
+    testImplementation(libs.mockk)
+    testImplementation(libs.koin.test)
 }
 
 tasks.test {
