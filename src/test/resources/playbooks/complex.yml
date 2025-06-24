@@ -1,0 +1,38 @@
+---
+- name: Complex deployment playbook
+  hosts: production
+  become: yes
+  gather_facts: yes
+  vars:
+    deployment_user: deploy
+    app_version: "{{ lookup('env', 'APP_VERSION') | default('latest') }}"
+  
+  pre_tasks:
+    - name: Ensure deployment user exists
+      user:
+        name: "{{ deployment_user }}"
+        state: present
+  
+  roles:
+    - common
+    - webserver
+    - role: app
+      when: inventory_hostname in groups['app']
+  
+  tasks:
+    - name: Deploy application
+      git:
+        repo: https://github.com/example/app.git
+        dest: /opt/app
+        version: "{{ app_version }}"
+      notify: restart app
+    
+    - name: Run database migrations
+      command: /opt/app/bin/migrate
+      when: inventory_hostname in groups['db']
+  
+  handlers:
+    - name: restart app
+      service:
+        name: myapp
+        state: restarted

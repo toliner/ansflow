@@ -1,0 +1,17 @@
+---
+- name: Playbook with variables
+  hosts: "{{ target_hosts | default('all') }}"
+  vars:
+    app_name: myapp
+    app_port: 8080
+  tasks:
+    - name: Create application directory
+      file:
+        path: "/opt/{{ app_name }}"
+        state: directory
+        mode: '0755'
+    
+    - name: Configure application
+      template:
+        src: app.conf.j2
+        dest: "/opt/{{ app_name }}/config.conf"

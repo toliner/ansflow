@@ -1,0 +1,13 @@
+---
+- name: Malformed playbook
+  hosts: web
+  tasks:
+    - name: Task without module
+      # Missing module definition
+    
+    - name: Another task
+      debug:
+        msg: "This is valid"
+      
+  # Invalid YAML indentation below
+ become: yes

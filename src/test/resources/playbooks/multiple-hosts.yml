@@ -1,0 +1,24 @@
+---
+- name: Deploy application
+  hosts: web:db
+  become: yes
+  tasks:
+    - name: Update package cache
+      apt:
+        update_cache: yes
+    
+    - name: Install common packages
+      package:
+        name:
+          - git
+          - curl
+          - vim
+        state: present
+
+- name: Configure database servers
+  hosts: db
+  tasks:
+    - name: Install PostgreSQL
+      package:
+        name: postgresql
+        state: present

@@ -1,0 +1,14 @@
+---
+- name: Simple playbook
+  hosts: web
+  tasks:
+    - name: Ensure nginx is installed
+      package:
+        name: nginx
+        state: present
+    
+    - name: Start nginx service
+      service:
+        name: nginx
+        state: started
+        enabled: yes
