@@ -1,0 +1,42 @@
+all:
+  vars:
+    ansible_user: deploy
+    ansible_python_interpreter: /usr/bin/python3
+  children:
+    ungrouped:
+      hosts:
+        misc1.example.com:
+    webservers:
+      hosts:
+        web1.example.com:
+          ansible_host: 192.168.1.10
+          http_port: 8080
+        web2.example.com:
+      vars:
+        http_port: 80
+        document_root: /var/www/html
+    databases:
+      hosts:
+        db-master.example.com:
+          ansible_host: 192.168.2.10
+          role: master
+        db-slave.example.com:
+          ansible_host: 192.168.2.11
+          role: slave
+    application:
+      hosts:
+        app1.example.com:
+        app2.example.com:
+    production:
+      children:
+        webservers:
+        databases:
+      vars:
+        env: production
+        debug_mode: false
+    staging:
+      children:
+        application:
+      vars:
+        env: staging
+        debug_mode: true

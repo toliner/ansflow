@@ -1,0 +1,23 @@
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+  children:
+    web:
+      hosts:
+        web1.example.com:
+          ansible_host: 192.168.1.10
+          ansible_port: 2222
+        web2.example.com:
+          ansible_host: 192.168.1.11
+      vars:
+        http_port: 80
+        ansible_user: webuser
+    db:
+      hosts:
+        db1.example.com:
+          ansible_user: dbadmin
+        db2.example.com:
+      vars:
+        db_port: 5432
+        ansible_user: dbuser

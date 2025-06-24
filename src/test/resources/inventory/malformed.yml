@@ -1,0 +1,11 @@
+all:
+  hosts:
+    web1.example.com
+      ansible_host: 192.168.1.10  # Missing colon after hostname
+  children:
+    web:
+      hosts:
+        - web2.example.com  # Wrong format - should be mapping not list
+    db:
+      invalid_key:  # Invalid key - should be hosts or vars
+        db1.example.com:
