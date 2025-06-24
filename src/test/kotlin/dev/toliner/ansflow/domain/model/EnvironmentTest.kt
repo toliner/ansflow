@@ -18,7 +18,7 @@ class EnvironmentTest : BehaviorSpec({
             }
 
             Then("should have exactly 2 values") {
-                Environment.values().size shouldBe 2
+                Environment.entries.size shouldBe 2
             }
         }
 

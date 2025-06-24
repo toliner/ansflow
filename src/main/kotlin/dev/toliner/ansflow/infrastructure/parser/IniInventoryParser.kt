@@ -4,14 +4,17 @@ import dev.toliner.ansflow.domain.model.Environment
 import dev.toliner.ansflow.domain.model.Host
 import dev.toliner.ansflow.domain.model.HostGroup
 import dev.toliner.ansflow.domain.model.Inventory
+import dev.toliner.ansflow.domain.service.InventoryParser
 import java.io.File
 
-class IniInventoryParser {
+class IniInventoryParser : InventoryParser {
+    override val format: InventoryParser.Format = InventoryParser.Format.INI
+
     private val sectionRegex = Regex("""^\[([^\]]+)\]$""")
     private val hostLineRegex = Regex("""^(\S+)(?:\s+(.+))?$""")
     private val variableRegex = Regex("""(\w+)=([^\s]+)""")
 
-    fun parse(
+    override fun parse(
         content: String,
         environment: Environment,
     ): Result<Inventory> {
@@ -28,7 +31,7 @@ class IniInventoryParser {
         }
     }
 
-    fun parseFile(
+    override fun parseFile(
         path: String,
         environment: Environment,
     ): Result<Inventory> {

@@ -1,6 +1,7 @@
 package dev.toliner.ansflow.infrastructure.parser
 
 import com.charleskorn.kaml.Yaml
+import com.charleskorn.kaml.YamlConfiguration
 import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode
 import com.charleskorn.kaml.YamlNull
@@ -9,12 +10,18 @@ import dev.toliner.ansflow.domain.model.Environment
 import dev.toliner.ansflow.domain.model.Host
 import dev.toliner.ansflow.domain.model.HostGroup
 import dev.toliner.ansflow.domain.model.Inventory
+import dev.toliner.ansflow.domain.service.InventoryParser
 import java.io.File
 
-class YAMLInventoryParser {
-    private val yaml = Yaml.default
+class YAMLInventoryParser: InventoryParser {
 
-    fun parse(
+    override val format: InventoryParser.Format = InventoryParser.Format.YAML
+
+    private val yaml = Yaml(configuration = YamlConfiguration(
+        strictMode = false,
+    ))
+
+    override fun parse(
         content: String,
         environment: Environment,
     ): Result<Inventory> {
@@ -32,7 +39,7 @@ class YAMLInventoryParser {
         }
     }
 
-    fun parseFile(
+    override fun parseFile(
         path: String,
         environment: Environment,
     ): Result<Inventory> {

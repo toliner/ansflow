@@ -36,20 +36,16 @@ class HostGroupTest : BehaviorSpec({
             // Build hierarchy from bottom up with proper parent references
             lateinit var rootGroup: HostGroup
             lateinit var prodGroup: HostGroup
-            lateinit var webGroup: HostGroup
-            lateinit var appGroup: HostGroup
 
             // Create leaf groups first
-            webGroup =
-                HostGroup(
+            var webGroup = HostGroup(
                     name = "web",
                     hosts = listOf(Host("web1"), Host("web2")),
                     children = emptyList(),
                     parent = null,
                 )
 
-            appGroup =
-                HostGroup(
+            var appGroup = HostGroup(
                     name = "app",
                     hosts = listOf(Host("app1"), Host("app2"), Host("app3")),
                     children = emptyList(),

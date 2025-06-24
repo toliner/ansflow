@@ -69,9 +69,7 @@ class YamlPlaybookParser {
     ): Playbook {
         val fields = mutableMapOf<String, YamlNode>()
         playNode.entries.forEach { (key, value) ->
-            if (key is YamlScalar) {
-                fields[key.content] = value
-            }
+            fields[key.content] = value
         }
 
         // Extract name (required)
@@ -131,9 +129,7 @@ class YamlPlaybookParser {
     private fun parseTask(taskNode: YamlMap): Task? {
         val fields = mutableMapOf<String, YamlNode>()
         taskNode.entries.forEach { (key, value) ->
-            if (key is YamlScalar) {
-                fields[key.content] = value
-            }
+            fields[key.content] = value
         }
 
         val name = extractString(fields["name"]) ?: return null
@@ -157,7 +153,7 @@ class YamlPlaybookParser {
             if (debugMsg is YamlMap) {
                 val args = mutableMapOf<String, String>()
                 debugMsg.entries.forEach { (k, v) ->
-                    if (k is YamlScalar && v is YamlScalar) {
+                    if (v is YamlScalar) {
                         args[k.content] = v.content
                     }
                 }
@@ -194,22 +190,20 @@ class YamlPlaybookParser {
     private fun parseModuleArgs(argsNode: YamlMap): Map<String, String> {
         val args = mutableMapOf<String, String>()
         argsNode.entries.forEach { (k, v) ->
-            if (k is YamlScalar) {
-                when (v) {
-                    is YamlScalar -> args[k.content] = v.content
-                    is YamlList -> {
-                        // Handle list values by joining them
-                        args[k.content] =
-                            v.items.joinToString(",") { item ->
-                                (item as? YamlScalar)?.content ?: item.toString()
-                            }
-                    }
-                    is YamlMap -> {
-                        // For complex values, convert to string representation
-                        args[k.content] = v.toString()
-                    }
-                    else -> args[k.content] = v.toString()
+            when (v) {
+                is YamlScalar -> args[k.content] = v.content
+                is YamlList -> {
+                    // Handle list values by joining them
+                    args[k.content] =
+                        v.items.joinToString(",") { item ->
+                            (item as? YamlScalar)?.content ?: item.toString()
+                        }
                 }
+                is YamlMap -> {
+                    // For complex values, convert to string representation
+                    args[k.content] = v.toString()
+                }
+                else -> args[k.content] = v.toString()
             }
         }
         return args

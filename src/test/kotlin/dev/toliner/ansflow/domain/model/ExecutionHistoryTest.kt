@@ -109,7 +109,7 @@ class ExecutionHistoryTest : BehaviorSpec({
                 ExecutionStatus.SUCCESS shouldNotBe null
                 ExecutionStatus.FAILED shouldNotBe null
                 ExecutionStatus.CANCELLED shouldNotBe null
-                ExecutionStatus.values().size shouldBe 3
+                ExecutionStatus.entries.size shouldBe 3
             }
         }
     }
