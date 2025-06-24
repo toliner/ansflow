@@ -18,38 +18,41 @@ class YAMLInventoryParserTest : BehaviorSpec({
         val parser = YAMLInventoryParser()
 
         When("parsing simple YAML inventory") {
-            val content = """
+            val content =
+                """
                 all:
                   hosts:
                     web1.example.com:
                     web2.example.com:
                     db1.example.com:
                     db2.example.com:
-            """.trimIndent()
+                """.trimIndent()
 
             Then("should parse all hosts in the all group") {
                 val result = parser.parse(content, Environment.DEVELOPMENT)
-                
+
                 result.shouldBeSuccess()
                 val inventory = result.getOrNull()!!
                 inventory.environment shouldBe Environment.DEVELOPMENT
-                
+
                 // Should have one top-level group: all
                 inventory.groups shouldHaveSize 1
                 val allGroup = inventory.groups.first()
                 allGroup.name shouldBe "all"
                 allGroup.hosts shouldHaveSize 4
-                allGroup.hosts.map { it.name } shouldContainExactlyInAnyOrder listOf(
-                    "web1.example.com",
-                    "web2.example.com",
-                    "db1.example.com",
-                    "db2.example.com"
-                )
+                allGroup.hosts.map { it.name } shouldContainExactlyInAnyOrder
+                    listOf(
+                        "web1.example.com",
+                        "web2.example.com",
+                        "db1.example.com",
+                        "db2.example.com",
+                    )
             }
         }
 
         When("parsing YAML inventory with groups and variables") {
-            val content = """
+            val content =
+                """
                 all:
                   hosts:
                     localhost:
@@ -73,56 +76,62 @@ class YAMLInventoryParserTest : BehaviorSpec({
                       vars:
                         db_port: 5432
                         ansible_user: dbuser
-            """.trimIndent()
+                """.trimIndent()
 
             Then("should parse groups with their variables") {
                 val result = parser.parse(content, Environment.DEVELOPMENT)
-                
+
                 result.shouldBeSuccess()
                 val inventory = result.getOrNull()!!
-                
+
                 val allGroup = inventory.findGroup("all")!!
                 allGroup.hosts shouldHaveSize 1
                 allGroup.children shouldHaveSize 2
-                
+
                 // Check localhost host
                 val localhost = allGroup.hosts.first()
                 localhost.name shouldBe "localhost"
-                localhost.variables shouldContainExactly mapOf(
-                    "ansible_connection" to "local"
-                )
-                
+                localhost.variables shouldContainExactly
+                    mapOf(
+                        "ansible_connection" to "local",
+                    )
+
                 // Check web group
                 val webGroup = allGroup.findChild("web")!!
                 webGroup.hosts shouldHaveSize 2
-                
+
                 val web1 = webGroup.hosts.find { it.name == "web1.example.com" }!!
-                web1.variables shouldContainExactly mapOf(
-                    "ansible_host" to "192.168.1.10",
-                    "ansible_port" to "2222",
-                    "http_port" to "80",
-                    "ansible_user" to "webuser"
-                )
-                
+                web1.variables shouldContainExactly
+                    mapOf(
+                        "ansible_host" to "192.168.1.10",
+                        "ansible_port" to "2222",
+                        "http_port" to "80",
+                        "ansible_user" to "webuser",
+                    )
+
                 val web2 = webGroup.hosts.find { it.name == "web2.example.com" }!!
-                web2.variables shouldContainExactly mapOf(
-                    "ansible_host" to "192.168.1.11",
-                    "http_port" to "80",
-                    "ansible_user" to "webuser"
-                )
-                
+                web2.variables shouldContainExactly
+                    mapOf(
+                        "ansible_host" to "192.168.1.11",
+                        "http_port" to "80",
+                        "ansible_user" to "webuser",
+                    )
+
                 // Check db group
                 val dbGroup = allGroup.findChild("db")!!
                 val db1 = dbGroup.hosts.find { it.name == "db1.example.com" }!!
-                db1.variables shouldContainExactly mapOf(
-                    "ansible_user" to "dbadmin",  // Host var overrides group var
-                    "db_port" to "5432"
-                )
+                db1.variables shouldContainExactly
+                    mapOf(
+                        // Host var overrides group var
+                        "ansible_user" to "dbadmin",
+                        "db_port" to "5432",
+                    )
             }
         }
 
         When("parsing YAML inventory with nested groups") {
-            val content = """
+            val content =
+                """
                 all:
                   children:
                     production:
@@ -148,33 +157,33 @@ class YAMLInventoryParserTest : BehaviorSpec({
                             web-staging.example.com:
                       vars:
                         env: staging
-            """.trimIndent()
+                """.trimIndent()
 
             Then("should create hierarchical group structure") {
                 val result = parser.parse(content, Environment.DEVELOPMENT)
-                
+
                 result.shouldBeSuccess()
                 val inventory = result.getOrNull()!!
-                
+
                 val allGroup = inventory.findGroup("all")!!
                 allGroup.children shouldHaveSize 2
-                
+
                 // Check production hierarchy
                 val productionGroup = allGroup.findChild("production")!!
                 productionGroup.children shouldHaveSize 3
                 productionGroup.children.map { it.name } shouldContainExactlyInAnyOrder listOf("web", "db", "app")
-                
+
                 // Check that parent references are correct
                 val webGroup = productionGroup.findChild("web")!!
                 webGroup.parent?.name shouldBe "production"
-                
+
                 // Check that group vars are inherited
                 val allHosts = productionGroup.getAllHosts()
                 allHosts.forEach { host ->
                     host.variables["env"] shouldBe "prod"
                     host.variables["ansible_ssh_common_args"] shouldBe "-o StrictHostKeyChecking=no"
                 }
-                
+
                 // Check staging hierarchy
                 val stagingGroup = allGroup.findChild("staging")!!
                 stagingGroup.children shouldHaveSize 1
@@ -188,27 +197,27 @@ class YAMLInventoryParserTest : BehaviorSpec({
 
             Then("should handle all features together") {
                 val result = parser.parse(content, Environment.DEVELOPMENT)
-                
+
                 result.shouldBeSuccess()
                 val inventory = result.getOrNull()!!
-                
+
                 val allGroup = inventory.findGroup("all")!!
-                
+
                 // Check all:vars are applied globally
                 allGroup.getAllHosts().forEach { host ->
                     host.variables.containsKey("ansible_user") shouldBe true
                     host.variables.containsKey("ansible_python_interpreter") shouldBe true
                 }
-                
+
                 // Check ungrouped hosts
                 val ungroupedGroup = allGroup.findChild("ungrouped")
                 ungroupedGroup.shouldNotBeNull()
                 ungroupedGroup.hosts shouldHaveSize 1
-                
+
                 // Check production group inherits children
                 val productionGroup = allGroup.findChild("production")!!
                 productionGroup.children.map { it.name } shouldContainExactlyInAnyOrder listOf("webservers", "databases")
-                
+
                 // Check that production hosts have both global and production vars
                 val prodHosts = productionGroup.getAllHosts()
                 prodHosts.forEach { host ->
@@ -220,7 +229,8 @@ class YAMLInventoryParserTest : BehaviorSpec({
         }
 
         When("parsing YAML inventory without all group") {
-            val content = """
+            val content =
+                """
                 webservers:
                   hosts:
                     web1.example.com:
@@ -228,14 +238,14 @@ class YAMLInventoryParserTest : BehaviorSpec({
                 databases:
                   hosts:
                     db1.example.com:
-            """.trimIndent()
+                """.trimIndent()
 
             Then("should create implicit all group") {
                 val result = parser.parse(content, Environment.DEVELOPMENT)
-                
+
                 result.shouldBeSuccess()
                 val inventory = result.getOrNull()!!
-                
+
                 // Parser should create an implicit 'all' group
                 inventory.groups shouldHaveSize 1
                 val allGroup = inventory.groups.first()
@@ -245,15 +255,16 @@ class YAMLInventoryParserTest : BehaviorSpec({
         }
 
         When("parsing empty YAML inventory") {
-            val content = """
+            val content =
+                """
                 all:
                   hosts:
                   children:
-            """.trimIndent()
+                """.trimIndent()
 
             Then("should create empty inventory") {
                 val result = parser.parse(content, Environment.DEVELOPMENT)
-                
+
                 result.shouldBeSuccess()
                 val inventory = result.getOrNull()!!
                 inventory.groups shouldHaveSize 1
@@ -264,26 +275,28 @@ class YAMLInventoryParserTest : BehaviorSpec({
 
         When("parsing malformed YAML inventory") {
             Then("should fail on syntax errors") {
-                val content = """
+                val content =
+                    """
                     all:
                       hosts:
                         web1.example.com
                           ansible_host: 192.168.1.10
-                """.trimIndent()
-                
+                    """.trimIndent()
+
                 val result = parser.parse(content, Environment.DEVELOPMENT)
                 result.shouldBeFailure()
                 result.exceptionOrNull()?.message shouldContain "YAML"
             }
 
             Then("should fail on invalid structure") {
-                val content = """
+                val content =
+                    """
                     all:
                       hosts:
                         - web1.example.com
                         - web2.example.com
-                """.trimIndent()
-                
+                    """.trimIndent()
+
                 val result = parser.parse(content, Environment.DEVELOPMENT)
                 result.shouldBeFailure()
                 result.exceptionOrNull()?.message shouldContain "must be a map"
@@ -295,7 +308,7 @@ class YAMLInventoryParserTest : BehaviorSpec({
 
             Then("should read and parse file content") {
                 val result = parser.parseFile(testFile.absolutePath, Environment.DEVELOPMENT)
-                
+
                 result.shouldBeSuccess()
                 val inventory = result.getOrNull()!!
                 val allGroup = inventory.groups.first()
@@ -305,13 +318,14 @@ class YAMLInventoryParserTest : BehaviorSpec({
 
         When("handling special cases") {
             Then("should handle hosts without children") {
-                val content = """
+                val content =
+                    """
                     all:
                       hosts:
                         web1.example.com:
                         web2.example.com:
-                """.trimIndent()
-                
+                    """.trimIndent()
+
                 val result = parser.parse(content, Environment.DEVELOPMENT)
                 result.shouldBeSuccess()
                 val inventory = result.getOrNull()!!
@@ -319,7 +333,8 @@ class YAMLInventoryParserTest : BehaviorSpec({
             }
 
             Then("should handle groups with only vars") {
-                val content = """
+                val content =
+                    """
                     all:
                       vars:
                         ansible_user: deploy
@@ -327,8 +342,8 @@ class YAMLInventoryParserTest : BehaviorSpec({
                         web:
                           hosts:
                             web1.example.com:
-                """.trimIndent()
-                
+                    """.trimIndent()
+
                 val result = parser.parse(content, Environment.DEVELOPMENT)
                 result.shouldBeSuccess()
                 val inventory = result.getOrNull()!!
@@ -337,7 +352,8 @@ class YAMLInventoryParserTest : BehaviorSpec({
             }
 
             Then("should handle numeric values in variables") {
-                val content = """
+                val content =
+                    """
                     all:
                       hosts:
                         web1.example.com:
@@ -345,8 +361,8 @@ class YAMLInventoryParserTest : BehaviorSpec({
                           max_connections: 100
                           load_factor: 0.75
                           enabled: true
-                """.trimIndent()
-                
+                    """.trimIndent()
+
                 val result = parser.parse(content, Environment.DEVELOPMENT)
                 result.shouldBeSuccess()
                 val inventory = result.getOrNull()!!
